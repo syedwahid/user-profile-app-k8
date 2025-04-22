@@ -6,9 +6,9 @@ pipeline {
     }
 
     environment {
-        DOCKER_IMAGE = "syedwahid/user-profile-app"
-        GIT_REPO = "https://github.com/syedwahid/user-profile-app"
-        CONTAINER_NAME = "user-profile-app"
+        DOCKER_IMAGE = "syedwahid/user-profile-app-k8"
+        GIT_REPO = "https://github.com/syedwahid/user-profile-app-k8"
+        CONTAINER_NAME = "user-profile-app-k8"
         TEST_PORT = "3001"
         // Add Kubernetes namespace (adjust as needed)
         K8S_NAMESPACE = "default"
