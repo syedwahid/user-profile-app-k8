@@ -9,7 +9,9 @@ pipeline {
         DOCKER_IMAGE = "syedwahid/user-profile-app"
         GIT_REPO = "https://github.com/syedwahid/user-profile-app"
         CONTAINER_NAME = "user-profile-app"
-        TEST_PORT = "3001"  // Different port for tests
+        TEST_PORT = "3001"
+        // Add Kubernetes namespace (adjust as needed)
+        K8S_NAMESPACE = "default"
     }
 
     stages {
@@ -20,11 +22,10 @@ pipeline {
             }
         }
 
-        // Stage 2: Run Tests (MOVED BEFORE DOCKER)
+        // Stage 2: Run Tests
         stage('Test Phone Number') {
             steps {
                 sh '''
-                # Use different port for tests
                 export PORT=${TEST_PORT}
                 npm install
                 npm test
@@ -71,23 +72,25 @@ pipeline {
             }
         }
 
-        // Stage 6: Run Container (LAST STEP)
-        stage('Run Docker Container') {
+        // Stage 6: Deploy to Kubernetes (REPLACED "Run Docker Container")
+        stage('Deploy to Kubernetes') {
             steps {
+                // Ensure kubectl is configured for your local cluster (e.g., Minikube)
                 sh '''
-                docker run -d \
-                    --name ${CONTAINER_NAME} \
-                    -p 3000:3000 \
-                    ${DOCKER_IMAGE}:latest
+                # Substitute variables in Kubernetes manifests
+                envsubst < kubernetes/deployment.yaml.template > kubernetes/deployment.yaml
+                # Apply Kubernetes resources
+                kubectl apply -f kubernetes/ -n ${K8S_NAMESPACE}
                 '''
             }
         }
     }
 
-
     post {
         always {
-            sh 'docker system df'  // Show disk usage (debug)
+            sh 'docker system df'
+            // Optional: Add Kubernetes status checks
+            sh 'kubectl get pods -n ${K8S_NAMESPACE}'
         }
         success {
             slackSend message: "✅ Pipeline SUCCESS - ${env.JOB_NAME} ${env.BUILD_NUMBER}"
