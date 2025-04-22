@@ -80,7 +80,7 @@ pipeline {
                 # Substitute variables in Kubernetes manifests
                 envsubst < kubernetes/deployment.yaml.template > kubernetes/deployment.yaml
                 # Apply Kubernetes resources
-                minikube kubectl apply -f kubernetes/ -n ${K8S_NAMESPACE}
+                minikube kubectl -- apply -f kubernetes/ -n ${K8S_NAMESPACE}
                 '''
             }
         }
@@ -90,7 +90,7 @@ pipeline {
         always {
             sh 'docker system df'
             // Optional: Add Kubernetes status checks
-            sh 'minikube kubectl get pods -n ${K8S_NAMESPACE}'
+            sh 'minikube kubectl -- get pods -n ${K8S_NAMESPACE}'
         }
         success {
             slackSend message: "✅ Pipeline SUCCESS - ${env.JOB_NAME} ${env.BUILD_NUMBER}"
